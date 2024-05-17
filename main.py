@@ -1,4 +1,4 @@
-################################################################################
+####################################################################################################
 # 
 # Filename: main.py
 #
@@ -13,7 +13,7 @@
 # Functions:
 #  - //FIXME add function description
 #
-################################################################################
+####################################################################################################
 
 import argparse as ap
 import decodeRiscv as dr
@@ -21,8 +21,9 @@ import decodeRiscv as dr
 # When user uses types "-h" or "--help", these messages are used
 help_msg = "put in your RISC-V instruction in binary or hex"
 
-parser = ap.ArgumentParser()							# Create a parser object
-parser.add_argument("instruction", type = int, help = help_msg)	# Add argument
+parser = ap.ArgumentParser()	# Create a parser object and add argument for input string
+parser.add_argument("instruction", type = str, help = help_msg)
 
-args = parser.parse_args()								# Collect user arguments
+args = parser.parse_args()		# Collect user arguments
 
+dr.decode_instruction(args.instruction)
