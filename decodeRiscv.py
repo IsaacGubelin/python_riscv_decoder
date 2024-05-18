@@ -5,8 +5,9 @@
 # Author: Isaac Gubelin
 # Date: May 13, 2024
 #
-# Description: This validates the input string and makes sure it is 32 bits and then decodes it
-#		into RISC-V assembly with a mnemonic, register numbers, and immediate if applicable.
+# Description: This file contains the functions for decoding a 32-bit RISC-V instruction.
+#		This validates the input string and then decodes it into RISC-V assembly with a
+#		mnemonic, register numbers, and immediate if applicable.
 #
 ####################################################################################################
 
@@ -58,7 +59,8 @@ def get_immediate(instruction):
 	elif inst_type == 'U':
 		return instruction >> 12
 	elif inst_type == 'J':
-		pass
+		imm = bin_str[0] + bin_str[12:20] + bin_str[11] + bin_str[1:11] + '0'
+		return int(imm, 2)
 	else:
 		return None
 
