@@ -1,16 +1,16 @@
 
-# This returns the corresponding instruction type letter from a 7-bit opcode
+# This returns the corresponding instruction type from a 7-bit opcode
 instr_types_from_opcode = {
 	0b0110011: 'R',
 	0b0010011: 'I',
-	0b0000011: 'I',
+	0b0000011: "I_load",
 	0b0100011: 'S',
 	0b1100011: 'B',
 	0b1101111: 'J',
-	0b1100111: 'I',
+	0b1100111: "I_jump",
 	0b0110111: 'U',
 	0b0010111: 'U',
-	0b1110011: 'I',
+	0b1110011: "I_environment",
 	0b0101111: 'R'
 }
 
@@ -44,6 +44,7 @@ instructions_rv32 = {
 	(0x23, 0x0): "sb",
 	(0x23, 0x1): "sh",
 	(0x23, 0x2): "sw",
+	(0x23, 0x3): "sd",
 	(0x63, 0x0): "beq",
 	(0x63, 0x1): "bne",
 	(0x63, 0x4): "blt",
@@ -56,7 +57,6 @@ instructions_rv32 = {
 	0x17:        "auipc",
 	(0x73, 0x0, 0x0): "ecall",
 	(0x73, 0x0, 0x1): "ebreak",
-
 	(0x33, 0x0, 0x01): "mul",
 	(0x33, 0x1, 0x01): "mulh",
 	(0x33, 0x2, 0x01): "mulsu",
