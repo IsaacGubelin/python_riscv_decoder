@@ -91,7 +91,7 @@ def is_hex_instruction(s):
 # Returns the immediate value of the instruction as an integer
 def get_immediate(instruction):
 	opcode = instruction & OPCODE_MASK             # Get opcode
-	inst_type = rt.instr_types_from_opcode[opcode] # Get instruction type
+	inst_type = instr_types_from_opcode[opcode] # Get instruction type
 	
 	# Make a string of pure binary, no prefix. This will make it easier to bit-slice
 	bin_str = format(instruction, '032b')
