@@ -14,7 +14,7 @@
 import riscv_tables as rt		# Contains dictionaries to help in decoding
 import re						# Regex for validating input
 
-
+# Masks for retrieving desired bits from 32-bit number
 OPCODE_MASK = 0x0000007f
 RS1_MASK = 0x000f8000
 RS2_MASK = 0x01f00000
@@ -46,29 +46,29 @@ def get_mnemonic(tup):
 def get_immediate(instruction):
 	opcode = instruction & OPCODE_MASK             # Get opcode
 	inst_type = rt.instr_types_from_opcode[opcode] # Get instruction type
-	
+
 	# Make a string of pure binary, no prefix. This will make it easier to bit-slice
 	bin_str = format(instruction, '032b')
 
 	# Immediate value is calculated based on instruction type
 	if inst_type in {'I', "I_load", "I_jump", "I_environment"}:
 		return instruction >> 20                    # I: Immediate is upper 12 bits
-	
+
 	elif inst_type == 'S':
 		imm = bin_str[0:7] + bin_str[20:25]         # S: Immediate is bits 31-25, 11-7
 		return int(imm, 2)
-	
+
 	elif inst_type == 'B':                          # ...and so on, folowing green card.
 		imm = bin_str[0] + bin_str[24] + bin_str[1:7] + bin_str[20:24] + '0'
 		return int(imm, 2)
-	
+
 	elif inst_type == 'U':
 		return instruction >> 12
-	
+
 	elif inst_type == 'J':
 		imm = bin_str[0] + bin_str[12:20] + bin_str[11] + bin_str[1:11] + '0'
 		return int(imm, 2)
-	
+
 	else:
 		return None
 
@@ -84,7 +84,7 @@ def decode_instruction(instr):
 	else:                               # If neither, instruction is invalid.
 		print("Invalid format. Use 32-bit binary or hex.")
 		return
-	
+
 	type = '?'
 
 	# Make an assembly equivalent string of the 32-bit instruction
@@ -97,48 +97,43 @@ def decode_instruction(instr):
 		fn7 = (instr & FN7_MASK) >> 25             # Get funct7
 		fn3 = (instr & FN3_MASK) >> 12             # Get funct3
 		imm = get_immediate(instr)           # Get value of immediate
-		name = ""                            # This will be the mnemonic
 
-		if type == 'R':                  # R-format:  cmd rd, rs1, rs2
-			name = get_mnemonic((opcode, fn3, fn7))     # Get instruction name
-			print("Assembly: ", name, rd + ',', rs1 + ',', rs2) # Print assembly
-	
-		elif type == 'I':                # I arithmetic format: cmd rd, rs1, imm
-			if fn3 == 0x1 or fn3 == 0x5:    # These funct3 codes mean funct7 is needed
+		if type == 'R':
+			name = get_mnemonic((opcode, fn3, fn7))       # Get instruction name
+			print(f"Assembly: {name} {rd}, {rs1}, {rs2}") # Print assembly
+
+		elif type == 'I':
+			if fn3 == 0x1 or fn3 == 0x5:     # These funct3 codes mean funct7 is needed
 				name = get_mnemonic((opcode, fn3, fn7))
-				print("Assembly: ", name, rd + ',', rs1 + ',', imm)
+				print(f"Assembly: {name} {rd}, {rs1}, {imm}")
 			else:
-				name = get_mnemonic((opcode, fn3))                  # Get assembly command
-				print("Assembly: ", name, rd + ',', rs1 + ',', imm) # Print assembly text
+				name = get_mnemonic((opcode, fn3))
+				print(f"Assembly: {name} {rd}, {rs1}, {imm}")
 
-		elif type == "I_load" or type == "I_jump": # Load format: cmd rd, imm(rs1)
+		elif type == "I_load" or type == "I_jump":
 			name = get_mnemonic((opcode, fn3))
-			print("Assembly: ", name, rd + ',', str(imm) + '(' + rs1 + ')')
+			print(f"Assembly: {name} {rd}, {imm}({rs1})")
 
 		elif type == "I_environment":  # rs1, rs2, and rd are zero for environment calls
 			if rs1 != "x0" or rd != "x0":
 				print("Invalid environment instruction, registers must be zero.")
 			else:
 				name = get_mnemonic((opcode, fn3, imm))
-				print("Assembly: ", name)
+				print(f"Assembly: {name}")
 
-		elif type == 'S':              # S-format: cmd rs2, imm(rs1)
+		elif type == 'S':
 			name = get_mnemonic((opcode, fn3))
-			print("Assembly: ", name, rs2 + ',', str(imm) + '(' + rs1 + ')')
-			print("type")
+			print(f"Assembly: {name} {rs2}, {imm}({rs1})")
 
-		elif type == 'B':              # B-format: cmd rs1, rs2, imm
+		elif type == 'B':
 			name = get_mnemonic((opcode, fn3))
-			print("Assembly: ", name, rs1 + ',', rs2 + ',', imm)
+			print(f"Assembly: {name} {rs1}, {rs2}, {imm}")
 
-		elif type == 'J':              # J-format: jal rd, imm
+		elif type == 'J' or type == 'U':
 			name = get_mnemonic(opcode)
-			print("Assembly: ", name, rd +',', imm)
+			print(f"Assembly: {name} {rd}, {imm}")
 
-		elif type == 'U':              # U-format:  cmd rd, imm
-			name = get_mnemonic(opcode)
-			print("Assembly: ", name, rd + ',', imm)
+		print(f"Format: {type[0]}-type")    # Print instruction format type
 
-		print("Format:   ", type[0] + "-type")                 # Print instruction type
-	except:
-			print("Error: Nonexistent " + type[0] + "-type instruction.")
+	except KeyError:
+		print(f"Error: Nonexistent {type[0]}-type instruction.")
