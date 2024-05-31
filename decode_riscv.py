@@ -1,5 +1,5 @@
 ##########################################################################################
-# 
+#
 # Filename: decodeRiscv.py
 #
 # Author: Isaac Gubelin
@@ -11,8 +11,8 @@
 #
 ##########################################################################################
 
-import riscv_tables as rt		# Contains dictionaries to help in decoding
 import re						# Regex for validating input
+import riscv_tables as rt		# Contains dictionaries to help in decoding
 
 # Masks for retrieving desired bits from 32-bit number
 OPCODE_MASK = 0x0000007f
@@ -77,32 +77,32 @@ def get_immediate(instruction):
 # and decodes it into its assembly form with the mnemonic.
 def decode_instruction(instr):
 
-	if is_binary_instruction(instr):    # Check if instruction is binary
-		instr = int(instr, 2)           # Convert string to base-2 int
-	elif is_hex_instruction(instr):     # Otherwise, if string is hex
-		instr = int(instr, 16)          # Convert to base-16 int
+	if is_binary_instruction(instr):
+		instr = int(instr, 2)           # Convert string to base-2 int if binary
+	elif is_hex_instruction(instr):
+		instr = int(instr, 16)          # Convert to base-16 int if hexadecimal
 	else:                               # If neither, instruction is invalid.
 		print("Invalid format. Use 32-bit binary or hex.")
 		return
 
-	type = '?'
+	f_type = '?'
 
 	# Make an assembly equivalent string of the 32-bit instruction
 	try:
 		opcode = instr & OPCODE_MASK               # Get opcode
-		type = get_instruction_type(opcode)  # Single letter for type
-		rs1 = 'x' + str((instr & RS1_MASK) >> 15)  # Get rs1
-		rs2 = 'x' + str((instr & RS2_MASK) >> 20)  # Get rs2
-		rd  = 'x' + str((instr & RD_MASK)  >> 7)   # Get rd
-		fn7 = (instr & FN7_MASK) >> 25             # Get funct7
-		fn3 = (instr & FN3_MASK) >> 12             # Get funct3
-		imm = get_immediate(instr)           # Get value of immediate
+		f_type = get_instruction_type(opcode)      # Get instruction format type
+		rs1 = 'x' + str((instr & RS1_MASK) >> 15)  # Get rs1 and all critical pieces
+		rs2 = 'x' + str((instr & RS2_MASK) >> 20)
+		rd  = 'x' + str((instr & RD_MASK)  >> 7)
+		fn7 = (instr & FN7_MASK) >> 25
+		fn3 = (instr & FN3_MASK) >> 12
+		imm = get_immediate(instr)
 
-		if type == 'R':
+		if f_type == 'R':
 			name = get_mnemonic((opcode, fn3, fn7))       # Get instruction name
 			print(f"Assembly: {name} {rd}, {rs1}, {rs2}") # Print assembly
 
-		elif type == 'I':
+		elif f_type == 'I':
 			if fn3 == 0x1 or fn3 == 0x5:     # These funct3 codes mean funct7 is needed
 				name = get_mnemonic((opcode, fn3, fn7))
 				print(f"Assembly: {name} {rd}, {rs1}, {imm}")
@@ -110,30 +110,30 @@ def decode_instruction(instr):
 				name = get_mnemonic((opcode, fn3))
 				print(f"Assembly: {name} {rd}, {rs1}, {imm}")
 
-		elif type == "I_load" or type == "I_jump":
+		elif f_type == "I_load" or f_type == "I_jump":
 			name = get_mnemonic((opcode, fn3))
 			print(f"Assembly: {name} {rd}, {imm}({rs1})")
 
-		elif type == "I_environment":  # rs1, rs2, and rd are zero for environment calls
+		elif f_type == "I_environment":  # rs1, rs2, and rd are zero for environment calls
 			if rs1 != "x0" or rd != "x0":
 				print("Invalid environment instruction, registers must be zero.")
 			else:
 				name = get_mnemonic((opcode, fn3, imm))
 				print(f"Assembly: {name}")
 
-		elif type == 'S':
+		elif f_type == 'S':
 			name = get_mnemonic((opcode, fn3))
 			print(f"Assembly: {name} {rs2}, {imm}({rs1})")
 
-		elif type == 'B':
+		elif f_type == 'B':
 			name = get_mnemonic((opcode, fn3))
 			print(f"Assembly: {name} {rs1}, {rs2}, {imm}")
 
-		elif type == 'J' or type == 'U':
+		elif f_type == 'J' or f_type == 'U':
 			name = get_mnemonic(opcode)
 			print(f"Assembly: {name} {rd}, {imm}")
 
-		print(f"Format: {type[0]}-type")    # Print instruction format type
+		print(f"Format: {f_type[0]}-type")    # Print instruction format type
 
 	except KeyError:
-		print(f"Error: Nonexistent {type[0]}-type instruction.")
+		print(f"Error: Nonexistent {f_type[0]}-type instruction.")

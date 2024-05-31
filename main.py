@@ -1,5 +1,5 @@
 ##########################################################################################
-# 
+#
 # Filename: main.py
 #
 # Author: Isaac Gubelin
@@ -12,7 +12,7 @@
 ##########################################################################################
 
 import argparse as ap
-import decodeRiscv as dr
+import decode_riscv as dr
 
 def main():
 
