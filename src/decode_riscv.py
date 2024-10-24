@@ -73,15 +73,22 @@ def get_immediate(instruction):
 		return None
 
 
+# Convert string to binary integer
+def get_base_2_int(instr):
+	return int(instr, 2)
+
+def get_hex_int(instr):
+	return int(instr, 16)
+
 # The main decoding function. This accepts a single instruction string
 # and decodes it into its assembly form with the mnemonic.
 def decode_instruction(instr):
 
 	if is_binary_instruction(instr):
-		instr = int(instr, 2)           # Convert string to base-2 int if binary
+		instr = get_base_2_int(instr)
 	elif is_hex_instruction(instr):
-		instr = int(instr, 16)          # Convert to base-16 int if hexadecimal
-	else:                               # If neither, instruction is invalid.
+		instr = get_hex_int(instr)
+	else:
 		print("Invalid format. Use 32-bit binary or hex.")
 		return
 
