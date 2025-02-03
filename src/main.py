@@ -10,19 +10,19 @@ Description: This program uses the argparse library to collect a RISC-V instruct
 
 """
 
-import argparse as ap
-import decode_riscv as dr
+from argparse import ArgumentParser
+from decode_riscv import decode_instruction
 
 
 def main():
 
     help_msg = "put in your RISC-V instruction in binary or hex"
 
-    parser = ap.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("instruction", type=str, help=help_msg)
     args = parser.parse_args()
 
-    dr.decode_instruction(args.instruction)
+    decode_instruction(args.instruction)
 
 
 if __name__ == "__main__":

@@ -11,9 +11,9 @@ Description: This file contains the functions for decoding a 32-bit RISC-V instr
 """
 
 import re  # Regex for validating input
-import riscv_tables as rt  # Contains dictionaries to help in decoding
+from riscv_tables import instr_types_from_opcode, instructions_rv32
 
-# Masks for retrieving desired bits from 32-bit number
+"""Masks for retrieving desired bits from 32-bit number"""
 OPCODE_MASK = 0x0000007F
 RS1_MASK = 0x000F8000
 RS2_MASK = 0x01F00000
@@ -25,7 +25,7 @@ FN7_MASK = 0xFE000000
 def is_binary_instruction(s):
     """
     Check valid binary format of a string.
-        Accepts binary with or without '0b', rejects anything that isn't 32 bits long.
+    Accepts binary with or without '0b', rejects anything that isn't 32 bits long.
     """
     return bool(re.match(r"^(0[bB])?[01]{32}$", s))  # String match with Regex
 
@@ -33,26 +33,26 @@ def is_binary_instruction(s):
 def is_hex_instruction(s):
     """
     Check if a string is a hexadecimal literal.
-        Accepts binary with or without '0x' and rejects non-32-bit numbers.
+    Accepts binary with or without '0x' and rejects non-32-bit numbers.
     """
     return bool(re.match(r"^(0[xX])?[0-9a-fA-F]{8}$", s))
 
 
 def get_instruction_type(opcode):
     """Retrieve the instruction type letter for the given opcode."""
-    return rt.instr_types_from_opcode[opcode]
+    return instr_types_from_opcode[opcode]
 
 
 def get_mnemonic(tup):
     """Retrieves the mnemonic for an instruction opcode and funct codes in a tuple."""
-    return rt.instructions_rv32[tup]
+    return instructions_rv32[tup]
 
 
 def get_immediate(instruction):
     """Returns the immediate value of the instruction as an integer"""
 
     opcode = instruction & OPCODE_MASK  # Get opcode
-    inst_type = rt.instr_types_from_opcode[opcode]  # Get instruction type
+    inst_type = instr_types_from_opcode[opcode]  # Get instruction type
 
     # Make a string of pure binary, no prefix. This will make it easier to bit-slice
     bin_str = format(instruction, "032b")
